@@ -1,0 +1,11 @@
+- name: Initialize Kubernetes master node
+  command: >
+    kubeadm init --pod-network-cidr={{ pod_network_cidr }}
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Configure kubeconfig for root user
+  copy:
+    remote_src: yes
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config

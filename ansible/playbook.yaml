@@ -1,0 +1,228 @@
+- name: "[1/6] Deploying k8s cluster"
+  hosts: k8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+        cni_plugin: "{{ hostvars[inventory_hostname].cni }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+        - include_tasks: "tasks/install_flannel.yml"
+
+        # 워커 노드 조인을 위한 토큰 생성
+        - name: Generate join command for worker nodes
+          shell: kubeadm token create --print-join-command
+          register: join_command
+          changed_when: false
+
+        # 조인 명령을 그룹 변수로 설정
+        - name: Set join command as a fact
+          set_fact:
+            workerjoin_command: "{{ join_command.stdout }}"
+          delegate_to: localhost
+
+- name: "[1/6] Deploying k8s cluster (workers)"
+  hosts: k8s-worker
+  tasks:
+    - name: Install required packages (kubelet, kubeadm, kubectl)
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+
+    # 조인 명령 실행
+    - name: Join the Kubernetes cluster
+      shell: "{{ hostvars['k8s-master'].worker_join_command }}"
+      when: worker_join_command is defined
+
+
+- name: "[2/6] Deploying hk8s cluster"
+  hosts: hk8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+        cni_plugin: "{{ hostvars[inventory_hostname].cni }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+        - include_tasks: "tasks/install_calico.yml"
+
+        - name: Generate join command for worker nodes
+          shell: kubeadm token create --print-join-command
+          register: join_command
+          changed_when: false
+
+        - name: Set join command as a fact
+          set_fact:
+            workerjoin_command: "{{ join_command.stdout }}"
+          delegate_to: localhost 
+
+- name:  "[2/6] Deploying hk8s cluster (workers)"
+  hosts: hk8s-worker
+  tasks:
+    - name: Install required packages (kubelet, kubeadm, kubectl)
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+    
+    - name: Join the Kubernetes cluster
+      shell: "{{ hostvars['k8s-master'].worker_join_command }}"
+      when: worker_join_command is defined
+
+
+
+- name: "[3/6] Deploying bk8s cluster"
+  hosts: bk8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+        cni_plugin: "{{ hostvars[inventory_hostname].cni }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+        - include_tasks: "tasks/install_flannel.yml"
+
+        # 워커 노드 조인을 위한 토큰 생성
+        - name: Generate join command for worker nodes
+          shell: kubeadm token create --print-join-command
+          register: join_command
+          changed_when: false
+
+        # 조인 명령을 그룹 변수로 설정
+        - name: Set join command as a fact
+          set_fact:
+            workerjoin_command: "{{ join_command.stdout }}"
+          delegate_to: localhost
+
+- name: "[3/6] Deploying bk8s cluster (workers)"
+  hosts: bk8s-worker
+  tasks:
+    - name: Install required packages (kubelet, kubeadm, kubectl)
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+
+    # 조인 명령 실행
+    - name: Join the Kubernetes cluster
+      shell: "{{ hostvars['k8s-master'].worker_join_command }}"
+      when: worker_join_command is defined
+
+
+- name: "[4/6] Deploying wk8s cluster"
+  hosts: wk8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+        cni_plugin: "{{ hostvars[inventory_hostname].cni }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+        - include_tasks: "tasks/install_flannel.yml"
+        
+        # 워커 노드 조인을 위한 토큰 생성
+        - name: Generate join command for worker nodes
+          shell: kubeadm token create --print-join-command
+          register: join_command
+          changed_when: false
+
+        # 조인 명령을 그룹 변수로 설정
+        - name: Set join command as a fact
+          set_fact:
+            workerjoin_command: "{{ join_command.stdout }}"
+          delegate_to: localhost
+
+- name: "[4/6] Deploying k8s cluster (workers)"
+  hosts: wk8s-worker
+  tasks:
+    - name: Install required packages (kubelet, kubeadm, kubectl)
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+
+    # 조인 명령 실행
+    - name: Join the Kubernetes cluster
+      shell: "{{ hostvars['k8s-master'].worker_join_command }}"
+      when: worker_join_command is defined
+
+
+- name: "[5/6] Deploying ek8s cluster"
+  hosts: ek8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+        cni_plugin: "{{ hostvars[inventory_hostname].cni }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+        - include_tasks: "tasks/install_flannel.yml"
+        
+        # 워커 노드 조인을 위한 토큰 생성
+        - name: Generate join command for worker nodes
+          shell: kubeadm token create --print-join-command
+          register: join_command
+          changed_when: false
+
+        # 조인 명령을 그룹 변수로 설정
+        - name: Set join command as a fact
+          set_fact:
+            workerjoin_command: "{{ join_command.stdout }}"
+          delegate_to: localhost
+
+- name: "[5/6] Deploying ek8s cluster (workers)"
+  hosts: ek8s-worker
+  tasks:
+    - name: Install required packages (kubelet, kubeadm, kubectl)
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+
+    # 조인 명령 실행
+    - name: Join the Kubernetes cluster
+      shell: "{{ hostvars['e8s-master'].worker_join_command }}"
+      when: worker_join_command is defined
+
+
+- name: "[6/6] Deploying ik8s cluster (master)"
+  hosts: ik8s-master
+  roles:
+    - role: kubernetes
+      vars:
+        pod_network_cidr: "{{ hostvars[inventory_hostname].pod_network_cidr }}"
+      tasks:
+        - include_tasks: "tasks/init_master.yml"
+
+- name: "[6/6] Deploying ik8s cluster (base node)"
+  hosts: ik8s-base
+  roles:
+    - role: kubernetes
+      tasks:
+        - include_tasks: "tasks/install_loopback.yml"

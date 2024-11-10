@@ -1,0 +1,2 @@
+- name: Configure loopback CNI
+  shell: echo "Loopback CNI configured for inactive node"

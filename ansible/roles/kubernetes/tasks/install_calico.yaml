@@ -1,0 +1,4 @@
+- name: Install Calico CNI
+  shell: kubectl apply -f {{ cni_plugins.calico }}
+  environment:
+    KUBECONFIG: /root/.kube/config

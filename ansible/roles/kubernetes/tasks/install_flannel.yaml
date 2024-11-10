@@ -1,0 +1,4 @@
+- name: Install Flannel CNI
+  shell: kubectl apply -f {{ cni_plugins.flannel }}
+  environment:
+    KUBECONFIG: /root/.kube/config
